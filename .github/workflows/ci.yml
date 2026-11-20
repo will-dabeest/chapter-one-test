@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    runs-on: ubuntu-24.04   # ubuntu-latest is 26.04, where setup-ruby has no prebuilt Ruby 3.4.4
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ruby/setup-ruby@v1
+        with:
+          working-directory: server   # uses: steps ignore defaults.run; finds .ruby-version and Gemfile.lock
+          bundler-cache: true
+      - run: bin/rails db:test:prepare   # not db:prepare: in the test env it also loads seeds, which the specs don't expect
+      - run: bundle exec rspec
+      - run: bundle exec brakeman --no-pager   # not bin/brakeman: its --ensure-latest exits without scanning when a newer release exists
+      - run: bin/rubocop -f github
+
+  client:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: client/.nvmrc
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build   # tsc -b (spec files included) + vite build
+      - run: npx vitest run
