@@ -1,5 +1,8 @@
+export type WordPartStatus = "mastered" | "needs_work";
+
 export type WordPart = {
   id: number;
   label: string;
-  status?: "mastered" | "needs_practice";
+  position: number;
+  status: WordPartStatus | null;
 }

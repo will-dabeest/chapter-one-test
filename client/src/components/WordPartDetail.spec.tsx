@@ -1,14 +1,16 @@
-import {describe, expect, it, vi} from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 import WordPartDetail from "./WordPartDetail.tsx";
-import {fireEvent, render, screen} from "@testing-library/react";
+import {cleanup, fireEvent, render, screen} from "@testing-library/react";
 import {WordPart} from "../types/WordPart.ts";
 
 describe("WordPartDetail", () => {
+    afterEach(cleanup);
+
     it("calls the onNeedsWork callback when the Needs Work button is clicked", () => {
         const onNeedsWork = vi.fn();
         const onMastered = vi.fn();
 
-        const wordPart: WordPart = {id: 1, label: "test"};
+        const wordPart: WordPart = {id: 1, label: "test", position: 0, status: null};
 
         render(<WordPartDetail wordPart={wordPart} onMastered={onMastered} onNeedsWork={onNeedsWork}/>);
 
@@ -22,11 +24,11 @@ describe("WordPartDetail", () => {
         const onNeedsWork = vi.fn();
         const onMastered = vi.fn();
 
-        const wordPart: WordPart = {id: 1, label: "test"};
+        const wordPart: WordPart = {id: 1, label: "test", position: 0, status: null};
 
         render(<WordPartDetail wordPart={wordPart} onMastered={onMastered} onNeedsWork={onNeedsWork}/>);
 
-        const masteredButton = screen.getByRole("button", {name: "Needs work" });
+        const masteredButton = screen.getByRole("button", {name: "Got it!" });
         fireEvent.click(masteredButton);
 
         expect(onMastered).toHaveBeenCalled();
